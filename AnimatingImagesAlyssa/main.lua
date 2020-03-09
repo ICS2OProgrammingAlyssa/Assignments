@@ -8,9 +8,10 @@ display.setStatusBar(display.HiddenStatusBar)
 
 -- global variables 
 
-
 -- display background image with width and height
 local backgroundImage = display.newImageRect("Images/lozBackground.jpg", 3840, 2160)
 
--- display cute korok with width and height
+-- display characters with width and height
 local cuteKorok = display.newImageRect("Images/cuteKorok1.png", 300, 200)
+
+--
