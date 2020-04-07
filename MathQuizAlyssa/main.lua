@@ -236,7 +236,7 @@ local function NumericFieldListener( event )
 end
 
 -- function that cllas the timer
-local function StartTimer()
+local function StartTimer( event )
 	-- create a countdown timer that loops infinitely
 	countDownTimer = timer.performWithDelay( 1000, UpdateTime, 0)
 end
