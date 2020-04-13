@@ -1,14 +1,14 @@
 -- Title: MathQuiz
 -- Name: Alyssa
 -- Course: ICS2O
--- This program asks the user a math question and has to answer in a limitted
--- ammount of time, and keeps track of the users score and lives.
+-- This program asks the user a math question and has to answer in a limited
+-- amount of time, and keeps track of the users score and lives.
 
 -- hide status bar
 display.setStatusBar(display.HiddenStatusBar)
 
 -- set the background color
-display.setDefault("background", 229/255, 243/255, 255/255)
+display.setDefault("background", 237/255, 255/255, 226/255)
 
 -------------------------------------------------------------------------------------------
 -- VARIABLES
@@ -23,14 +23,17 @@ local lives = 4
 local heart1
 local heart2
 local heart3
-local heart4
 local gameOver
 local questionObject                                                                        
 local correctObject                                                                       
 local incorrectObject
 local numericField                                                                        
-local randomNumber1
-local randomNumber2
+local randomNumber1AddSub
+local randomNumber2AddSub
+local randomNumber1Multi
+local randomNumber2Multi
+local randomNumber1Divi
+local randomNumber2Divi
 local userAnswer
 local correctAnswer
 local correctSound
@@ -40,6 +43,7 @@ local pointsText
 local randomOperator                                                                                 
 local backgroundMusic
 local backgroundMusicChannel
+local gameOverSound
 
 -------------------------------------------------------------------------------------------
 -- OBJECT CREATION              
@@ -68,8 +72,8 @@ pointsText = display.newText("Points: " .. points, display.contentWidth/6, displ
 pointsText:setTextColor(98/255, 98/255, 98/255)
 
 -- create the correct and incorrect correct sound 
-correctSound = audio.loadSound( "Sounds/Correct Answer Sound Effect.mp3" )
-incorrectSound = audio.loadSound( "Sounds/Wrong Buzzer Sound Effect.mp3" )
+correctSound = audio.loadSound( "Sounds/Correct sound.mp3" )
+incorrectSound = audio.loadSound( "Sounds/Wrong sound.mp3" )
 
 -- create the background music
 backgroundMusic = audio.loadSound( "Sounds/bensound-littleidea.mp3" )
@@ -90,11 +94,6 @@ heart3.x = display.contentWidth * 5/8
 heart3.y = display.contentHeight * 1/7
 heart3.isVisible = true
 
-heart4 = display.newImageRect("Images/heart.png", 100, 100)
-heart4.x = display.contentWidth * 4/8
-heart4.y = display.contentHeight * 1/7
-heart4.isVisible = true
-
 -- create the clock object
 clockText = display.newText( secondsLeft .. "", display.contentWidth/2, display.contentHeight*6/7, nil, 50 )
 clockText:setTextColor(98/255, 98/255, 98/255)
@@ -104,6 +103,9 @@ gameOver = display.newImageRect("Images/gameOver.png", 1024, 768)
 gameOver.x = display.contentWidth/2
 gameOver.y = display.contentHeight/2
 gameOver.isVisible = false
+
+-- create the game over sound
+gameOverSound = audio.loadSound( "Sounds/GameOverSoundEffect.mp3" )
 
 -------------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
@@ -125,14 +127,15 @@ local function UpdateTime()
 		secondsLeft = totalSeconds
 		lives = lives - 1
 
-		if (lives == 3) then
-			heart4.isVisible = false
-		elseif (lives == 2) then
+		if (lives == 2) then
 			heart3.isVisible = false
 		elseif (lives == 1) then
 			heart2.isVisible = false
 		elseif (lives == 0) then
 			heart1.isVisible = false
+			timer.cancel(countDownTimer)
+			gameOver.isVisible = true
+			audio.play(gameOverSound)
 		end
 	 
 	end
@@ -141,43 +144,42 @@ end
 
 
 local function AskQuestion()
-	--reset timer
-	
 	-- generate a random number between 1 and 4
 	randomOperator = math.random(1,4)
 
-	-- generate 2 random numbers
-	randomNumber1 = math.random(0,5)
-	randomNumber2 = math.random(5,10)
-
 	-- if the random operator is 1, then do addition
 	if (randomOperator == 1) then
+		--randomize 2 numbers
+		randomNumber1AddSub = math.random(1,10)
+		randomNumber2AddSub = math.random(10,20)
         -- calculate the correct answer
-		correctAnswer = randomNumber1 + randomNumber2
+		correctAnswer = randomNumber1AddSub + randomNumber2AddSub
 
 		-- create question in text object
-		questionObject.text = randomNumber1 .. " + " .. randomNumber2 .. " = "
+		questionObject.text = randomNumber1AddSub .. " + " .. randomNumber2AddSub .. " = "
 
 	-- if the random operator is 2, do subtraction
 	elseif (randomOperator == 2) then
 		-- calculate the correct answer
-		correctAnswer = randomNumber2 - randomNumber1
+		correctAnswer = randomNumber2AddSub - randomNumber1AddSub
 
 		-- create question in text object
-		questionObject.text = randomNumber2 .. " - " .. randomNumber1 .. " = "
+		questionObject.text = randomNumber2AddSub .. " - " .. randomNumber1AddSub .. " = "
 
     -- if the random operator is 3, then do multiplication
 	elseif (randomOperator == 3) then
+
+		-- generate random numbers
 		-- calculate the correct answer
-		correctAnswer = randomNumber1 * randomNumber2
+		correctAnswer = randomNumber1Multi * randomNumber2Multi
 
 		-- create question in text object
-		questionObject.text = randomNumber1 .. " x " .. randomNumber2 .. " = "
+		questionObject.text = randomNumber1Multi .. " × " .. randomNumber2Multi .. " = "
 
      -- if the random operator is 4, then do division
 	elseif (randomOperator == 4) then
 		-- calculate the correct answer
-		correctAnswer = randomNumber1 / randomNumber2
+		correctAnswer = randomNumber1Divi / randomNumber2Divi
 
 		-- round to 1 decimal place
 		correctAnswer = correctAnswer * 10
@@ -186,7 +188,7 @@ local function AskQuestion()
 
 
 		-- create question in text object
-		questionObject.text = randomNumber1 .. " / " .. randomNumber2 .. " = "
+		questionObject.text = randomNumber1Divi .. " ÷ " .. randomNumber2Divi .. " = "
 	end
 end
 
@@ -219,6 +221,7 @@ local function NumericFieldListener( event )
 			timer.performWithDelay( 1500, HideCorrect )
             audio.play( correctSound )
 			event.target.text = ""
+			timer.cancel(countDownTimer)
 
 			-- give the user a point
 			points = points + 1
@@ -231,30 +234,26 @@ local function NumericFieldListener( event )
 			timer.performWithDelay( 1500, HideIncorrect )
 			audio.play( incorrectSound )
 			event.target.text = ""
+			timer.cancel(countDownTimer)
 		end
 	end
 end
 
--- function that cllas the timer
+-- function that calls the timer
 local function StartTimer( event )
 	-- create a countdown timer that loops infinitely
 	countDownTimer = timer.performWithDelay( 1000, UpdateTime, 0)
 end
 
--- stop the timer
-local function StopTimer
-	if (lives == 0) then
-		timer.cancel( countDownTimer )
-
-
 ------------------------------------------------------------------------------------------
 -- FUNCTION CALLS
 ------------------------------------------------------------------------------------------
 
--- call the function to ask the question
+-- call the functions
 AskQuestion()
+StartTimer()
 
--- add the event listenr to the numeric field
+-- add the event listener to the numeric field
 numericField:addEventListener( "userInput", NumericFieldListener )
 
 
