@@ -15,7 +15,7 @@ display.setDefault("background", 237/255, 255/255, 226/255)
 -------------------------------------------------------------------------------------------
 
 --variables for timer
-local totalSeconds = 10
+local TOTAL_SECONDS = 10
 local secondsLeft = 10
 local clockText
 local countDownTimer
@@ -28,8 +28,10 @@ local questionObject
 local correctObject                                                                       
 local incorrectObject
 local numericField                                                                        
-local randomNumber1AddSub
-local randomNumber2AddSub
+local randomNumber1Add
+local randomNumber2Add
+local randomNumber1Sub
+local randomNumber2Sub
 local randomNumber1Multi
 local randomNumber2Multi
 local randomNumber1Divi
@@ -37,13 +39,16 @@ local randomNumber2Divi
 local userAnswer
 local correctAnswer
 local correctSound
+local correctSoundChannel
 local incorrectSound
+local incorrectSoundChannel
 local points = 0
 local pointsText
 local randomOperator                                                                                 
-local backgroundMusic
-local backgroundMusicChannel
 local gameOverSound
+local gameOverSoundChannel
+local youWinImage
+local youWinSound
 
 -------------------------------------------------------------------------------------------
 -- OBJECT CREATION              
@@ -67,16 +72,14 @@ incorrectObject.isVisible = false
 numericField = native.newTextField( display.contentWidth*3/5, display.contentHeight/2, 200, 80)
 numericField.inputType = "decimal"
 
+
 -- display the points text and change to color
 pointsText = display.newText("Points: " .. points, display.contentWidth/6, display.contentHeight/7, nil, 50)
 pointsText:setTextColor(98/255, 98/255, 98/255)
 
 -- create the correct and incorrect correct sound 
-correctSound = audio.loadSound( "Sounds/Correct sound.mp3" )
-incorrectSound = audio.loadSound( "Sounds/Wrong sound.mp3" )
-
--- create the background music
-backgroundMusic = audio.loadSound( "Sounds/bensound-littleidea.mp3" )
+correctSound = audio.loadSound( "Sounds/Correct sound.wav" )
+incorrectSound = audio.loadSound( "Sounds/Wrong sound.wav" )
 
 -- create the lives to display on the screen
 heart1 = display.newImageRect("Images/heart.png", 100, 100)
@@ -105,7 +108,14 @@ gameOver.y = display.contentHeight/2
 gameOver.isVisible = false
 
 -- create the game over sound
-gameOverSound = audio.loadSound( "Sounds/GameOverSoundEffect.mp3" )
+gameOverSound = audio.loadSound( "Sounds/GameOverSoundEffect.wav" )
+
+-- create the you win image
+youWinImage = display.newImageRect( "Images/youWinImage.png", 1024, 768)
+youWinImage.isVisible = false
+
+-- create the winning sound when the user wins
+youWinSound = audio.loadSound( "Sounds/Ta Da win sound.wav")
 
 -------------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
@@ -124,7 +134,7 @@ local function UpdateTime()
 
 	if (secondsLeft == 0) then 
 		-- reset the number of seconds left
-		secondsLeft = totalSeconds
+		secondsLeft = TOTAL_SECONDS
 		lives = lives - 1
 
 		if (lives == 2) then
@@ -132,44 +142,54 @@ local function UpdateTime()
 		elseif (lives == 1) then
 			heart2.isVisible = false
 		elseif (lives == 0) then
+			-- game over screen
 			heart1.isVisible = false
 			timer.cancel(countDownTimer)
 			gameOver.isVisible = true
 			audio.play(gameOverSound)
+			numericField.isVisible = false 
+
 		end
 	 
 	end
 
 end
 
-
 local function AskQuestion()
+
+-- start the timer.
+countDownTimer = timer.performWithDelay( 1000, UpdateTime, 0)
 	-- generate a random number between 1 and 4
 	randomOperator = math.random(1,4)
 
 	-- if the random operator is 1, then do addition
 	if (randomOperator == 1) then
 		--randomize 2 numbers
-		randomNumber1AddSub = math.random(1,10)
-		randomNumber2AddSub = math.random(10,20)
+		randomNumber1Add = math.random(1,20)
+		randomNumber2Add = math.random(1,20)
         -- calculate the correct answer
-		correctAnswer = randomNumber1AddSub + randomNumber2AddSub
+		correctAnswer = randomNumber1Add + randomNumber2Add
 
 		-- create question in text object
-		questionObject.text = randomNumber1AddSub .. " + " .. randomNumber2AddSub .. " = "
+		questionObject.text = randomNumber1Add .. " + " .. randomNumber2Add .. " = "
 
 	-- if the random operator is 2, do subtraction
 	elseif (randomOperator == 2) then
+		-- randomize 2 numbers
+		randomNumber1Sub = math.random(1,10)
+		randomNumber2Sub = math.random(11,20)
 		-- calculate the correct answer
-		correctAnswer = randomNumber2AddSub - randomNumber1AddSub
+		correctAnswer = randomNumber2Sub - randomNumber1Sub
 
 		-- create question in text object
-		questionObject.text = randomNumber2AddSub .. " - " .. randomNumber1AddSub .. " = "
+		questionObject.text = randomNumber2Sub .. " - " .. randomNumber1Sub .. " = "
 
     -- if the random operator is 3, then do multiplication
 	elseif (randomOperator == 3) then
 
 		-- generate random numbers
+		randomNumber1Multi = math.random(1,10)
+		randomNumber2Multi = math.random(1,10)
 		-- calculate the correct answer
 		correctAnswer = randomNumber1Multi * randomNumber2Multi
 
@@ -178,6 +198,9 @@ local function AskQuestion()
 
      -- if the random operator is 4, then do division
 	elseif (randomOperator == 4) then
+		-- randomize 2 numbers
+		randomNumber1Divi = math.random(1,100)
+		randomNumber2Divi = math.random(1,100)
 		-- calculate the correct answer
 		correctAnswer = randomNumber1Divi / randomNumber2Divi
 
@@ -191,6 +214,8 @@ local function AskQuestion()
 		questionObject.text = randomNumber1Divi .. " ÷ " .. randomNumber2Divi .. " = "
 	end
 end
+
+
 
 local function HideCorrect()
 	correctObject.isVisible = false
@@ -226,8 +251,14 @@ local function NumericFieldListener( event )
 			-- give the user a point
 			points = points + 1
 
-			--update the text
+			-- update the text
 			pointsText.text = "Points: " .. points
+
+		elseif (points == 5) then
+			youWinImage.isVisible = true
+			audio.play(youWinSound)
+			numericField.isVisible = false
+			timer.cancel(countDownTimer)
 
 		-- if the user gets the answer Wrong
 		else incorrectObject.isVisible = true
@@ -238,12 +269,7 @@ local function NumericFieldListener( event )
 		end
 	end
 end
-
--- function that calls the timer
-local function StartTimer( event )
-	-- create a countdown timer that loops infinitely
-	countDownTimer = timer.performWithDelay( 1000, UpdateTime, 0)
-end
+    
 
 ------------------------------------------------------------------------------------------
 -- FUNCTION CALLS
@@ -251,7 +277,7 @@ end
 
 -- call the functions
 AskQuestion()
-StartTimer()
+UpdateTime()
 
 -- add the event listener to the numeric field
 numericField:addEventListener( "userInput", NumericFieldListener )
