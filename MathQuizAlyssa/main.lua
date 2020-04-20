@@ -112,6 +112,8 @@ gameOverSound = audio.loadSound( "Sounds/GameOverSoundEffect.wav" )
 
 -- create the you win image
 youWinImage = display.newImageRect( "Images/youWinImage.png", 1024, 768)
+youWinImage.x = display.contentWidth/2
+youWinImage.y = display.contentHeight/2
 youWinImage.isVisible = false
 
 -- create the winning sound when the user wins
