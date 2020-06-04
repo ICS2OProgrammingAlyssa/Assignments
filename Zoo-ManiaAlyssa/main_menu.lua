@@ -1,43 +1,64 @@
 -----------------------------------------------------------------------------------------
 --
--- credits_screen.lua
+-- main_menu.lua
 -- Created by: Your Name
--- Special thanks to Wal Wal for helping in the design of this framework.
 -- Date: Month Day, Year
--- Description: This is the credits page, displaying a back button to the main menu.
+-- Description: This is the main menu, displaying the credits, instructions & play buttons.
 -----------------------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------------------
 -- INITIALIZATIONS
 -----------------------------------------------------------------------------------------
 
--- Use Composer Libraries
+-- Use Composer Library
 local composer = require( "composer" )
+
+-----------------------------------------------------------------------------------------
+
+-- Use Widget Library
 local widget = require( "widget" )
 
 -----------------------------------------------------------------------------------------
 
 -- Naming Scene
-sceneName = "instructions_screen"
+sceneName = "main_menu"
+
+-----------------------------------------------------------------------------------------
 
 -- Creating Scene Object
-scene = composer.newScene( sceneName ) -- This function doesn't accept a string, only a variable containing a string
+local scene = composer.newScene( sceneName )
 
 -----------------------------------------------------------------------------------------
 -- LOCAL VARIABLES
 -----------------------------------------------------------------------------------------
+
 local bkg_image
-local backButton
+local playButton
+local creditsButton
+local instructionsButton
 
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
 -----------------------------------------------------------------------------------------
 
--- Creating Transitioning Function back to main menu
-local function BackTransition( )
-    composer.gotoScene( "main_menu", {effect = "fromTop", time = 1000})
-end
+-- Creating Transition Function to Credits Page
+local function CreditsTransition( )       
+    composer.gotoScene( "credits_screen", {effect = "slideLeft", time = 500})
+end 
 
+-----------------------------------------------------------------------------------------
+
+-- Creating Transition to Level1 Screen
+local function Level1ScreenTransition( )
+    composer.gotoScene( "level1_screen", {effect = "crossFade", time = 1000})
+end    
+
+-----------------------------------------------------------------------------------------
+
+-- Creating Transition to Instructions Screen
+local function InstructionsTransition( )
+    composer.gotoScene( "instructions_screen", {effect = "fromBottom", time = 1000})
+end  
 
 -----------------------------------------------------------------------------------------
 -- GLOBAL SCENE FUNCTIONS
@@ -50,15 +71,16 @@ function scene:create( event )
     local sceneGroup = self.view
 
     -----------------------------------------------------------------------------------------
-    -- BACKGROUND AND DISPLAY OBJECTS
+    -- BACKGROUND IMAGE & STATIC OBJECTS
     -----------------------------------------------------------------------------------------
 
     -- Insert the background image and set it to the center of the screen
-    bkg_image = display.newImageRect("Images/instructions_screen.png", display.contentWidth, display.contentHeight)
+    bkg_image = display.newImage("Images/main_menu.png")
     bkg_image.x = display.contentCenterX
     bkg_image.y = display.contentCenterY
     bkg_image.width = display.contentWidth
     bkg_image.height = display.contentHeight
+
 
     -- Associating display objects with this scene 
     sceneGroup:insert( bkg_image )
@@ -68,34 +90,77 @@ function scene:create( event )
 
     -----------------------------------------------------------------------------------------
     -- BUTTON WIDGETS
-    -----------------------------------------------------------------------------------------
+    -----------------------------------------------------------------------------------------   
 
-    -- Creating Back Button
-    backButton = widget.newButton( 
-    {
-        -- Setting Position
-        x = display.contentWidth*1/8,
-        y = display.contentHeight*15/16,
+    -- Creating Play Button
+    playButton = widget.newButton( 
+        {   
+            -- Set its position on the screen relative to the screen size
+            x = display.contentWidth/2,
+            y = display.contentHeight*3/4,
 
-        -- Setting Dimensions
-        -- width = 1000,
-        -- height = 106,
+            width = 221,
+            height = 229,
 
-        -- Setting Visual Properties
-        defaultFile = "Images/Back Button Unpressed.png",
-        overFile = "Images/Back Button Pressed.png",
+            -- Insert the images here
+            defaultFile = "Images/Start Button Unpressed.png",
+            overFile = "Images/Start Button Pressed.png",
 
-        -- Setting Functional Properties
-        onRelease = BackTransition
-
-    } )
+            -- When the button is released, call the Level1 screen transition function
+            onRelease = Level1ScreenTransition          
+        } )
 
     -----------------------------------------------------------------------------------------
 
-    -- Associating Buttons with this scene
-    sceneGroup:insert( backButton )
+    -- Creating Credits Button
+    creditsButton = widget.newButton( 
+        {
+            -- Set its position on the screen relative to the screen size
+            x = display.contentWidth*6.5/8,
+            y = display.contentHeight*7/8,
+
+            width = 222,
+            height = 74,
+
+            -- Insert the images here
+            defaultFile = "Images/Credits Button Unpressed.png",
+            overFile = "Images/Credits Button Pressed.png",
+
+            -- When the button is released, call the Credits transition function
+            onRelease = CreditsTransition
+        } ) 
     
-end --function scene:create( event )
+    -----------------------------------------------------------------------------------------
+
+    -- Creating Instructions Button
+    instructionsButton = widget.newButton( 
+        {
+            -- Set its position on the screen relative to the screen size
+            x = display.contentWidth*1.5/8,
+            y = display.contentHeight*7/8,
+
+            
+            width = 308,
+            height = 63,
+
+            -- Insert the images here
+            defaultFile = "Images/Instructions Button Unpressed.png",
+            overFile = "Images/Instructions Button Pressed.png",
+
+            -- When the button is released, call the Instructions transition function
+            onRelease = InstructionsTransition
+        } ) 
+
+    -----------------------------------------------------------------------------------------
+
+    -- Associating button widgets with this scene
+    sceneGroup:insert( playButton )
+    sceneGroup:insert( creditsButton )
+    sceneGroup:insert( instructionsButton )
+
+end -- function scene:create( event )   
+
+
 
 -----------------------------------------------------------------------------------------
 
@@ -111,15 +176,17 @@ function scene:show( event )
 
     -----------------------------------------------------------------------------------------
 
+    -- Called when the scene is still off screen (but is about to come on screen).   
     if ( phase == "will" ) then
-        -- Called when the scene is still off screen (but is about to come on screen).
-
+       
     -----------------------------------------------------------------------------------------
 
-    elseif ( phase == "did" ) then
-        -- Called when the scene is now on screen.
-        -- Insert code here to make the scene come alive.
-        -- Example: start timers, begin animation, play audio, etc.
+    -- Called when the scene is now on screen.
+    -- Insert code here to make the scene come alive.
+    -- Example: start timers, begin animation, play audio, etc.
+    elseif ( phase == "did" ) then       
+        
+
     end
 
 end -- function scene:show( event )
@@ -149,7 +216,7 @@ function scene:hide( event )
         -- Called immediately after scene goes off screen.
     end
 
-end --function scene:hide( event )
+end -- function scene:hide( event )
 
 -----------------------------------------------------------------------------------------
 
@@ -159,14 +226,11 @@ function scene:destroy( event )
     -- Creating a group that associates objects with the scene
     local sceneGroup = self.view
 
-    -----------------------------------------------------------------------------------------
-
-
     -- Called prior to the removal of scene's view ("sceneGroup").
     -- Insert code here to clean up the scene.
     -- Example: remove display objects, save state, etc.
 
-end --function scene:destroy( event )
+end -- function scene:destroy( event )
 
 -----------------------------------------------------------------------------------------
 -- EVENT LISTENERS
@@ -181,5 +245,3 @@ scene:addEventListener( "destroy", scene )
 -----------------------------------------------------------------------------------------
 
 return scene
-
-
