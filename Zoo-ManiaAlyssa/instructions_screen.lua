@@ -21,7 +21,8 @@ local widget = require( "widget" )
 sceneName = "instructions_screen"
 
 -- Creating Scene Object
-scene = composer.newScene( sceneName ) -- This function doesn't accept a string, only a variable containing a string
+scene = composer.newScene( sceneName ) -- This function doesn't accept a string, only a
+-- variable containing a string
 
 -----------------------------------------------------------------------------------------
 -- LOCAL VARIABLES

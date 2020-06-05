@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------
 --
 -- main_menu.lua
--- Created by: Your Name
+-- Created by: Alyssa
 -- Date: Month Day, Year
 -- Description: This is the main menu, displaying the credits, instructions & play buttons.
 -----------------------------------------------------------------------------------------
@@ -36,6 +36,8 @@ local bkg_image
 local playButton
 local creditsButton
 local instructionsButton
+local backgroundMusic
+local backgroundMusicChannel
 
 -----------------------------------------------------------------------------------------
 -- LOCAL FUNCTIONS
@@ -70,9 +72,9 @@ function scene:create( event )
     -- Creating a group that associates objects with the scene
     local sceneGroup = self.view
 
-    -----------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------
     -- BACKGROUND IMAGE & STATIC OBJECTS
-    -----------------------------------------------------------------------------------------
+    --------------------------------------------------------------------------------------
 
     -- Insert the background image and set it to the center of the screen
     bkg_image = display.newImage("Images/main_menu.png")
@@ -88,9 +90,16 @@ function scene:create( event )
     -- Send the background image to the back layer so all other objects can be on top
     bkg_image:toBack()
 
-    -----------------------------------------------------------------------------------------
+    ---------------------------------------------------------------------------------------
+    -- SOUNDS AND MUSIC 
+    ---------------------------------------------------------------------------------------
+
+    -- create the background music 
+    backgroundMusic = audio.loadSound("Sounds/backgroundMusic.mp3")
+
+    ---------------------------------------------------------------------------------------
     -- BUTTON WIDGETS
-    -----------------------------------------------------------------------------------------   
+    ---------------------------------------------------------------------------------------
 
     -- Creating Play Button
     playButton = widget.newButton( 
@@ -162,7 +171,7 @@ end -- function scene:create( event )
 
 
 
------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 -- The function called when the scene is issued to appear on screen
 function scene:show( event )
@@ -184,14 +193,16 @@ function scene:show( event )
     -- Called when the scene is now on screen.
     -- Insert code here to make the scene come alive.
     -- Example: start timers, begin animation, play audio, etc.
-    elseif ( phase == "did" ) then       
-        
+    elseif ( phase == "did" ) then  
+
+        -- play the background music 
+        backgroundMusicChannel = audio.play(backgroundMusic)
 
     end
 
 end -- function scene:show( event )
 
------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 -- The function called when the scene is issued to leave the screen
 function scene:hide( event )
@@ -209,16 +220,20 @@ function scene:hide( event )
         -- Called when the scene is on screen (but is about to go off screen).
         -- Insert code here to "pause" the scene.
         -- Example: stop timers, stop animation, stop audio, etc.
+        
+        -- stop the background music 
+        audio.pause(backgroundMusicChannel, { loops = -1})
 
     -----------------------------------------------------------------------------------------
 
     elseif ( phase == "did" ) then
         -- Called immediately after scene goes off screen.
+
     end
 
 end -- function scene:hide( event )
 
------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 -- The function called when the scene is issued to be destroyed
 function scene:destroy( event )
@@ -232,9 +247,9 @@ function scene:destroy( event )
 
 end -- function scene:destroy( event )
 
------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 -- EVENT LISTENERS
------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 -- Adding Event Listeners
 scene:addEventListener( "create", scene )
@@ -242,6 +257,6 @@ scene:addEventListener( "show", scene )
 scene:addEventListener( "hide", scene )
 scene:addEventListener( "destroy", scene )
 
------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
 
 return scene
