@@ -196,7 +196,7 @@ function scene:show( event )
     elseif ( phase == "did" ) then  
 
         -- play the background music 
-        backgroundMusicChannel = audio.play(backgroundMusic)
+        backgroundMusicChannel = audio.play(backgroundMusic, { loops = -1})
 
     end
 
@@ -222,7 +222,7 @@ function scene:hide( event )
         -- Example: stop timers, stop animation, stop audio, etc.
         
         -- stop the background music 
-        audio.pause(backgroundMusicChannel, { loops = -1})
+        audio.pause(backgroundMusicChannel)
 
     -----------------------------------------------------------------------------------------
 
